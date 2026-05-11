@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محرر التطبيقات - App Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">⚡ محرر التطبيقات</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
+                    <button class="btn btn-primary" id="saveBtn">💾 حفظ</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Left Panel - Prompt Input -->
+            <div class="panel panel-left">
+                <div class="panel-header">
+                    <h2>📝 وصف التطبيق</h2>
+                    <span class="char-count"><span id="charCount">0</span>/1000</span>
+                </div>
+                <div class="panel-body">
+                    <textarea 
+                        id="promptInput" 
+                        class="prompt-textarea"
+                        placeholder="اكتب وصف التطبيق الذي تريد بناءه...&#10;&#10;مثال:&#10;أنشئ لي تطبيق قائمة مهام بسيط يحتوي على:&#10;- حقل إدخال لإضافة مهام جديدة&#10;- قائمة تعرض جميع المهام&#10;- زر لحذف المهام&#10;- عدّاد للمهام المكتملة"
+                        maxlength="1000"></textarea>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider"></div>
+
+            <!-- Right Panel - Preview -->
+            <div class="panel panel-right">
+                <div class="panel-header">
+                    <h2>👁️ معاينة التطبيق</h2>
+                    <button class="btn btn-small" id="refreshBtn">🔄 تحديث</button>
+                </div>
+                <div class="panel-body">
+                    <div id="preview" class="preview-area">
+                        <div class="empty-state">
+                            <p>🎨 ابدأ بكتابة وصف تطبيقك</p>
+                            <p class="secondary">سيظهر تصميم معاينة تطبيقك هنا</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
