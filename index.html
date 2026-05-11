@@ -3,60 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر التطبيقات - App Editor</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>محرر التطبيقات - App Editor with HTMX</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            200: '#e5e7eb',
+                            300: '#d1d5db',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            850: '#1a202c',
+                            900: '#0f1117',
+                            950: '#030712',
+                        },
+                        gold: {
+                            50: '#fffbf0',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    },
+                    fontFamily: {
+                        'tajawal': ['Tajawal', 'sans-serif'],
+                        'cairo': ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Tajawal Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <style>
+        * {
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f1117 0%, #1a202c 50%, #111827 100%);
+            min-height: 100vh;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #fbbf24;
+        }
+        
+        /* Loading Animation */
+        .htmx-request.htmx-settling .htmx-swapping {
+            opacity: 1;
+        }
+        
+        .htmx-request.htmx-settling .htmx-added.htmx-target {
+            opacity: 1;
+        }
+        
+        .htmx-swapping {
+            opacity: 0;
+            transition: opacity 0.2s ease-out;
+        }
+        
+        .htmx-settling {
+            opacity: 1;
+            transition: opacity 0.2s ease-in;
+        }
+        
+        /* Pulse Animation */
+        @keyframes pulse-gold {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+        
+        .htmx-request .spinner {
+            animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Glass Effect */
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        /* Smooth Transitions */
+        .smooth-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(245, 158, 11, 0.2);
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
+<body class="bg-dark-950 text-white">
+    <div class="min-h-screen flex flex-col">
         <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <h1 class="logo">⚡ محرر التطبيقات</h1>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" id="resetBtn">إعادة تعيين</button>
-                    <button class="btn btn-primary" id="saveBtn">💾 حفظ</button>
+        <header class="border-b border-dark-700 glass-effect sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">⚡</div>
+                        <div>
+                            <h1 class="text-2xl font-bold gradient-text">محرر التطبيقات</h1>
+                            <p class="text-sm text-dark-400">App Editor with HTMX</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button 
+                            hx-get="/status"
+                            hx-target="#status-badge"
+                            class="px-4 py-2 bg-dark-800 hover:bg-dark-700 border border-dark-600 rounded-lg smooth-transition text-sm"
+                        >
+                            📊 الحالة
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Main Content -->
-        <main class="main-content">
-            <!-- Left Panel - Prompt Input -->
-            <div class="panel panel-left">
-                <div class="panel-header">
-                    <h2>📝 وصف التطبيق</h2>
-                    <span class="char-count"><span id="charCount">0</span>/1000</span>
-                </div>
-                <div class="panel-body">
-                    <textarea 
-                        id="promptInput" 
-                        class="prompt-textarea"
-                        placeholder="اكتب وصف التطبيق الذي تريد بناءه...&#10;&#10;مثال:&#10;أنشئ لي تطبيق قائمة مهام بسيط يحتوي على:&#10;- حقل إدخال لإضافة مهام جديدة&#10;- قائمة تعرض جميع المهام&#10;- زر لحذف المهام&#10;- عدّاد للمهام المكتملة"
-                        maxlength="1000"></textarea>
-                </div>
-            </div>
+        <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                
+                <!-- Left Panel - Input Section -->
+                <section class="flex flex-col gap-4">
+                    <div class="glass-effect rounded-xl overflow-hidden shadow-2xl border border-dark-700">
+                        <!-- Panel Header -->
+                        <div class="bg-gradient-to-r from-dark-800 to-dark-700 px-6 py-4 border-b border-dark-600">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <span class="text-2xl">📝</span>
+                                    وصف التطبيق
+                                </h2>
+                                <span class="text-sm text-dark-400" id="char-counter">0/1000</span>
+                            </div>
+                        </div>
 
-            <!-- Divider -->
-            <div class="divider"></div>
+                        <!-- Panel Body -->
+                        <div class="p-6">
+                            <form 
+                                hx-post="/generate"
+                                hx-target="#preview-content"
+                                hx-swap="innerHTML swap:0.5s"
+                                hx-indicator="#loading-spinner"
+                                class="space-y-4"
+                            >
+                                <!-- Textarea -->
+                                <textarea
+                                    name="prompt"
+                                    id="prompt-input"
+                                    maxlength="1000"
+                                    rows="12"
+                                    hx-trigger="input changed delay:500ms"
+                                    hx-post="/validate"
+                                    hx-target="#validation-message"
+                                    class="w-full px-4 py-3 bg-dark-900 border border-dark-600 rounded-lg text-white placeholder-dark-500 focus:outline-none focus:border-gold-500 focus:ring-2 focus:ring-gold-500 focus:ring-opacity-20 smooth-transition resize-none font-mono"
+                                    placeholder="اكتب وصف التطبيق الذي تريد بناءه...
 
-            <!-- Right Panel - Preview -->
-            <div class="panel panel-right">
-                <div class="panel-header">
-                    <h2>👁️ معاينة التطبيق</h2>
-                    <button class="btn btn-small" id="refreshBtn">🔄 تحديث</button>
-                </div>
-                <div class="panel-body">
-                    <div id="preview" class="preview-area">
-                        <div class="empty-state">
-                            <p>🎨 ابدأ بكتابة وصف تطبيقك</p>
-                            <p class="secondary">سيظهر تصميم معاينة تطبيقك هنا</p>
+مثال:
+أنشئ لي تطبيق قائمة مهام متقدم يحتوي على:
+- حقل إدخال لإضافة مهام جديدة
+- قائمة تعرض جميع المهام
+- إمكانية حذف المهام
+- عدّاد للمهام المكتملة والمتبقية
+- حفظ البيانات محلياً"
+                                    oninput="document.getElementById('char-counter').textContent = this.value.length + '/1000'"
+                                ></textarea>
+
+                                <!-- Validation Message -->
+                                <div id="validation-message" class="text-sm text-dark-400"></div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex gap-3 pt-4">
+                                    <button
+                                        type="submit"
+                                        class="flex-1 px-6 py-3 bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700 text-dark-900 font-bold rounded-lg smooth-transition btn-hover flex items-center justify-center gap-2 shadow-lg"
+                                    >
+                                        <span>⚡</span>
+                                        <span>توليد التطبيق</span>
+                                        <span id="loading-spinner" class="htmx-indicator hidden">
+                                            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                    
+                                    <button
+                                        type="button"
+                                        hx-post="/reset"
+                                        hx-target="#prompt-input"
+                                        hx-swap="innerHTML"
+                                        class="px-6 py-3 bg-dark-800 hover:bg-dark-700 border border-dark-600 text-white font-bold rounded-lg smooth-transition btn-hover"
+                                    >
+                                        🔄 إعادة
+                                    </button>
+                                </div>
+
+                                <!-- Info Box -->
+                                <div class="mt-6 p-4 bg-dark-900 border border-dark-700 rounded-lg">
+                                    <p class="text-sm text-dark-300 flex items-start gap-2">
+                                        <span class="text-lg">💡</span>
+                                        <span>اكتب وصفاً تفصيلياً لتطبيقك وسيقوم المحرر باستخراج الميزات والتقنيات تلقائياً</span>
+                                    </p>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                </div>
+                </section>
+
+                <!-- Right Panel - Preview Section -->
+                <section class="flex flex-col gap-4">
+                    <div class="glass-effect rounded-xl overflow-hidden shadow-2xl border border-dark-700 flex-1 flex flex-col">
+                        <!-- Panel Header -->
+                        <div class="bg-gradient-to-r from-dark-800 to-dark-700 px-6 py-4 border-b border-dark-600">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-xl font-bold flex items-center gap-2">
+                                    <span class="text-2xl">👁️</span>
+                                    معاينة التطبيق
+                                </h2>
+                                <button
+                                    hx-get="/preview-help"
+                                    hx-target="#preview-content"
+                                    class="text-sm px-3 py-1 bg-dark-800 hover:bg-dark-700 rounded text-dark-300 smooth-transition"
+                                >
+                                    ❓
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Preview Content -->
+                        <div id="preview-content" class="flex-1 overflow-y-auto p-6">
+                            <div class="flex flex-col items-center justify-center h-full text-center gap-4">
+                                <div class="text-6xl">🎨</div>
+                                <h3 class="text-2xl font-bold text-dark-300">ابدأ بكتابة الوصف</h3>
+                                <p class="text-dark-400 max-w-sm">
+                                    اكتب وصف تطبيقك في القسم الأيسر واضغط "توليد التطبيق" لرؤية المعاينة هنا
+                                </p>
+                                <div class="text-sm text-dark-500 mt-4">
+                                    <p>📝 صياغة الوصف: وضحّ ما تريد</p>
+                                    <p>⚡ اضغط توليد: سيتم التحليل</p>
+                                    <p>👁️ شاهد المعاينة: هنا على اليمين</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="glass-effect border border-dark-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl text-gold-500 font-bold" id="stat-features">0</div>
+                            <div class="text-xs text-dark-400 mt-1">الميزات</div>
+                        </div>
+                        <div class="glass-effect border border-dark-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl text-gold-500 font-bold" id="stat-techs">0</div>
+                            <div class="text-xs text-dark-400 mt-1">التقنيات</div>
+                        </div>
+                        <div class="glass-effect border border-dark-700 rounded-lg p-4 text-center">
+                            <div class="text-2xl text-gold-500 font-bold" id="stat-complexity">-</div>
+                            <div class="text-xs text-dark-400 mt-1">المستوى</div>
+                        </div>
+                    </div>
+                </section>
+
             </div>
         </main>
+
+        <!-- Footer -->
+        <footer class="border-t border-dark-700 glass-effect mt-auto">
+            <div class="max-w-7xl mx-auto px-6 py-4 text-center text-dark-400 text-sm">
+                <p>تم إنشاؤه بـ ❤️ باستخدام HTMX و Tailwind CSS | © 2026 chinmed-dev</p>
+            </div>
+        </footer>
     </div>
 
-    <script src="script.js"></script>
+    <!-- HTMX Event Handlers -->
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function(event) {
+            // تحديث الإحصائيات عند الحصول على معاينة جديدة
+            if (event.detail.xhr.responseURL.includes('/generate')) {
+                // يمكن إضافة منطق لتحديث الإحصائيات هنا
+            }
+        });
+
+        document.body.addEventListener('htmx:responseError', function(event) {
+            // معالجة الأخطاء
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'fixed top-4 right-4 bg-red-900 border border-red-700 text-white px-4 py-3 rounded-lg';
+            errorMsg.textContent = '❌ حدث خطأ: ' + (event.detail.xhr.statusText || 'خطأ غير معروف');
+            document.body.appendChild(errorMsg);
+            setTimeout(() => errorMsg.remove(), 5000);
+        });
+    </script>
 </body>
 </html>
